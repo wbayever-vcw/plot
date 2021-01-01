@@ -24,6 +24,7 @@ export {linearRegressionX, linearRegressionY} from "./marks/linearRegression.js"
 export {Link, link} from "./marks/link.js";
 export {Raster, raster} from "./marks/raster.js";
 export {interpolateNone, interpolatorBarycentric, interpolateNearest, interpolatorRandomWalk} from "./marks/raster.js";
+export {pie} from "./marks/pie.js";
 export {Rect, rect, rectX, rectY} from "./marks/rect.js";
 export {RuleX, RuleY, ruleX, ruleY} from "./marks/rule.js";
 export {Text, text, textX, textY} from "./marks/text.js";
