@@ -67,8 +67,7 @@ export default defineConfig({
           {text: "Formats", link: "/features/formats"},
           {text: "Markers", link: "/features/markers"},
           {text: "Shorthand", link: "/features/shorthand"},
-          {text: "Accessibility", link: "/features/accessibility"},
-          {text: "Extensions", link: "/features/extensions"}
+          {text: "Accessibility", link: "/features/accessibility"}
         ]
       },
       {
