@@ -221,10 +221,10 @@ export function plot(options = {}) {
     addScaleChannels(newChannelsByScale, stateByMark, options, (key) => newByScale.has(key));
     addScaleChannels(channelsByScale, stateByMark, options, (key) => newByScale.has(key));
     const newScaleDescriptors = inheritScaleLabels(createScales(newChannelsByScale, options), scaleDescriptors);
-    const {scales: newIntantiatedScales, ...newScales} = createScaleFunctions(newScaleDescriptors);
+    const {scales: newExposedScales, ...newScales} = createScaleFunctions(newScaleDescriptors);
     Object.assign(scaleDescriptors, newScaleDescriptors);
     Object.assign(scales, newScales);
-    Object.assign(scales.scales, newIntantiatedScales);
+    Object.assign(scales.scales, newExposedScales);
   }
 
   // Sort and filter the facets to match the fx and fy domains; this is needed
@@ -357,13 +357,13 @@ export function plot(options = {}) {
 function createTitleElement(document, contents, tag) {
   if (contents.ownerDocument) return contents;
   const e = document.createElement(tag);
-  e.append(document.createTextNode(contents));
+  e.append(contents);
   return e;
 }
 
 function createFigcaption(document, caption) {
   const e = document.createElement("figcaption");
-  e.append(caption.ownerDocument ? caption : document.createTextNode(caption));
+  e.append(caption);
   return e;
 }
 

@@ -100,16 +100,14 @@ export function createScales(
 export function createScaleFunctions(descriptors) {
   const scales = {};
   const scaleFunctions = {scales};
-  for (const [key, desc] of Object.entries(descriptors)) {
-    const {scale, type, interval, label} = desc;
-    scales[key] = exposeScale(desc);
-    if (scale) {
-      scaleFunctions[key] = scale; // drop identity scales
-      // TODO: pass these properties, which are needed for axes, in the descriptor.
-      scale.type = type;
-      if (interval != null) scale.interval = interval;
-      if (label != null) scale.label = label;
-    }
+  for (const [key, descriptor] of Object.entries(descriptors)) {
+    const {scale, type, interval, label} = descriptor;
+    scales[key] = exposeScale(descriptor);
+    scaleFunctions[key] = scale;
+    // TODO: pass these properties, which are needed for axes, in the descriptor.
+    scale.type = type;
+    if (interval != null) scale.interval = interval;
+    if (label != null) scale.label = label;
   }
   return scaleFunctions;
 }
@@ -366,7 +364,7 @@ function createScale(key, channels = [], options = {}) {
     case "band":
       return createScaleBand(key, channels, options);
     case "identity":
-      return registry.get(key) === position ? createScaleIdentity() : {type: "identity"};
+      return createScaleIdentity(key);
     case undefined:
       return;
     default:
