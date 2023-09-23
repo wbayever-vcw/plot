@@ -66,9 +66,9 @@ export class Mark {
     this.dx = +dx;
     this.dy = +dy;
     this.marginTop = +marginTop;
-    this.marginRight = marginRight === "auto" ? "auto" : +marginRight;
+    this.marginRight = marginRight === "y" || marginRight === "fy" ? marginRight : +marginRight;
     this.marginBottom = +marginBottom;
-    this.marginLeft = marginLeft === "auto" ? "auto" : +marginLeft;
+    this.marginLeft = marginLeft === "y" || marginLeft === "fy" ? marginLeft : +marginLeft;
     this.clip = maybeClip(clip);
     this.tip = maybeTip(tip);
     // Super-faceting currently disallow position channels; in the future, we
