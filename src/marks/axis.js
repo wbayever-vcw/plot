@@ -91,6 +91,9 @@ function axisKy(
     ...options
   }
 ) {
+  let autoMarginLeft, autoMarginRight;
+  if (marginRight === k) (autoMarginRight = k), (marginRight = 40);
+  if (marginLeft === k) (autoMarginLeft = k), (marginLeft = 40);
   tickSize = number(tickSize);
   tickPadding = number(tickPadding);
   tickRotate = number(tickRotate);
@@ -125,6 +128,8 @@ function axisKy(
           marginRight,
           marginBottom,
           marginLeft,
+          autoMarginRight,
+          autoMarginLeft,
           ...options
         })
       : null,
@@ -615,6 +620,8 @@ function axisMark(mark, k, anchor, ariaLabel, data, options, initialize) {
     channels = {};
   }
   m.ariaLabel = ariaLabel;
+  m.autoMarginLeft = options.autoMarginLeft;
+  m.autoMarginRight = options.autoMarginRight;
   if (m.clip === undefined) m.clip = false; // don’t clip axes by default
   return m;
 }
