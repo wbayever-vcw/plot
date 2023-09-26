@@ -589,6 +589,7 @@ The function is expected to return a single SVG node, or null or undefined if th
 The *index* is an array of indices in the channels, that represent the points to be drawn in the current facet. The *scales* object contains the scale functions, indexed by name, and an additional scales property with the scales descriptors, also indexed by name.
 
 For example, the following code will log the color associated with the Torgersen category ("#e15759") and the [instantiated color scale object](./plots.md#plot_scale), and will not render anything to the chart.
+
 ```js
 Plot.dot(penguins, {
   x: "culmen_length_mm",
@@ -624,7 +625,7 @@ will output the following three lines to the console, with each line containing 
 220 '#4e79a7' 'Biscoe'
 ```
 
-The *dimensions* object contains the width, height, marginLeft, marginTop, marginRight, and marginBottom of the frame. For example, to draw an ellipse that extends to the edges:
+The *dimensions* object contains the marginTop, marginRight, marginLeft,marginBottom, and width and height of the chart. For example, to draw an ellipse that extends to the edges:
 
 ```js
 Plot.plot({
@@ -649,7 +650,7 @@ The *context* contains several useful globals:
 * projection - the [projection](./projections.md) stream, if any
 
 :::tip
-When writing a plugin, prefer *context*.document to the global document; this will allow your code to run in different contexts such as a server-side rendering environment.
+When you write a plugin, using *context*.document allows your code to run in different contexts such as a server-side rendering environment.
 :::
 
 The last argument, *next*, is a function that can be called to continue the render chain. For example, if you wish to animate a mark to fade in, you can render it as usual, immediately set its opacity to 0, then bring it to life with D3:
@@ -673,7 +674,7 @@ Plot.dot(penguins, {
 ```
 
 :::info
-Note that Plot’s marks usually set the attributes of the nodes than their styles. This allows you to play with the styles — which have a higher priority than the attributes — without conflicting.
+Note that Plot’s marks usually set the attributes of the nodes. As styles have precedence over attributes, the output can be customized with [CSS](https://developer.mozilla.org/en-US/docs/Web/CSS).
 :::
 
 Here is another example, where we render the dots one by one:
