@@ -1,4 +1,4 @@
-import {color, descending, quantile, range as rangei} from "d3";
+import {descending, quantile, range as rangei} from "d3";
 import {parse as isoParse} from "isoformat";
 import {defined} from "./defined.js";
 import {maybeTimeInterval, maybeUtcInterval} from "./time.js";
@@ -6,6 +6,10 @@ import {maybeTimeInterval, maybeUtcInterval} from "./time.js";
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray
 export const TypedArray = Object.getPrototypeOf(Uint8Array);
 const objectToString = Object.prototype.toString;
+
+// If a reindex is attached to the data, channel values expressed as arrays will
+// be reindexed when the channels are instantiated. See exclusiveFacets.
+export const reindex = Symbol("reindex");
 
 export function valueof(data, value, type) {
   const valueType = typeof value;
@@ -17,7 +21,11 @@ export function valueof(data, value, type) {
     ? map(data, constant(value), type)
     : typeof value?.transform === "function"
     ? maybeTypedArrayify(value.transform(data), type)
-    : maybeTypedArrayify(value, type);
+    : maybeTake(maybeTypedArrayify(value, type), data?.[reindex]);
+}
+
+function maybeTake(values, index) {
+  return index ? take(values, index) : values;
 }
 
 function maybeTypedMap(data, f, type) {
@@ -170,6 +178,7 @@ export function isScaleOptions(option) {
 
 // Disambiguates an options object (e.g., {y: "x2"}) from a channel value
 // definition expressed as a channel transform (e.g., {transform: …}).
+// TODO Check typeof option[Symbol.iterator] !== "function"?
 export function isOptions(option) {
   return isObject(option) && typeof option.transform !== "function";
 }
@@ -223,7 +232,7 @@ export function where(data, test) {
 
 // Returns an array [values[index[0]], values[index[1]], …].
 export function take(values, index) {
-  return map(index, (i) => values[i]);
+  return map(index, (i) => values[i], values.constructor);
 }
 
 // If f does not take exactly one argument, wraps it in a function that uses take.
@@ -348,6 +357,14 @@ export function maybeNiceInterval(interval, type) {
   return interval;
 }
 
+export function isTimeInterval(t) {
+  return isInterval(t) && typeof t?.floor === "function" && t.floor() instanceof Date;
+}
+
+export function isInterval(t) {
+  return typeof t?.range === "function";
+}
+
 // This distinguishes between per-dimension options and a standalone value.
 export function maybeValue(value) {
   return value === undefined || isOptions(value) ? value : {value};
@@ -442,20 +459,20 @@ export function isEvery(values, is) {
   return every;
 }
 
-// Mostly relies on d3-color, with a few extra color keywords. Currently this
-// strictly requires that the value be a string; we might want to apply string
-// coercion here, though note that d3-color instances would need to support
-// valueOf to work correctly with InternMap.
+const namedColors = new Set("none,currentcolor,transparent,aliceblue,antiquewhite,aqua,aquamarine,azure,beige,bisque,black,blanchedalmond,blue,blueviolet,brown,burlywood,cadetblue,chartreuse,chocolate,coral,cornflowerblue,cornsilk,crimson,cyan,darkblue,darkcyan,darkgoldenrod,darkgray,darkgreen,darkgrey,darkkhaki,darkmagenta,darkolivegreen,darkorange,darkorchid,darkred,darksalmon,darkseagreen,darkslateblue,darkslategray,darkslategrey,darkturquoise,darkviolet,deeppink,deepskyblue,dimgray,dimgrey,dodgerblue,firebrick,floralwhite,forestgreen,fuchsia,gainsboro,ghostwhite,gold,goldenrod,gray,green,greenyellow,grey,honeydew,hotpink,indianred,indigo,ivory,khaki,lavender,lavenderblush,lawngreen,lemonchiffon,lightblue,lightcoral,lightcyan,lightgoldenrodyellow,lightgray,lightgreen,lightgrey,lightpink,lightsalmon,lightseagreen,lightskyblue,lightslategray,lightslategrey,lightsteelblue,lightyellow,lime,limegreen,linen,magenta,maroon,mediumaquamarine,mediumblue,mediumorchid,mediumpurple,mediumseagreen,mediumslateblue,mediumspringgreen,mediumturquoise,mediumvioletred,midnightblue,mintcream,mistyrose,moccasin,navajowhite,navy,oldlace,olive,olivedrab,orange,orangered,orchid,palegoldenrod,palegreen,paleturquoise,palevioletred,papayawhip,peachpuff,peru,pink,plum,powderblue,purple,rebeccapurple,red,rosybrown,royalblue,saddlebrown,salmon,sandybrown,seagreen,seashell,sienna,silver,skyblue,slateblue,slategray,slategrey,snow,springgreen,steelblue,tan,teal,thistle,tomato,turquoise,violet,wheat,white,whitesmoke,yellow".split(",")); // prettier-ignore
+
+// Returns true if value is a valid CSS color string. This is intentionally lax
+// because the CSS color spec keeps growing, and we don’t need to parse these
+// colors—we just need to disambiguate them from column names.
 // https://www.w3.org/TR/SVG11/painting.html#SpecifyingPaint
+// https://www.w3.org/TR/css-color-5/
 export function isColor(value) {
   if (typeof value !== "string") return false;
   value = value.toLowerCase().trim();
   return (
-    value === "none" ||
-    value === "currentcolor" ||
-    (value.startsWith("url(") && value.endsWith(")")) || // <funciri>, e.g. pattern or gradient
-    (value.startsWith("var(") && value.endsWith(")")) || // CSS variable
-    color(value) !== null
+    /^#[0-9a-f]{3,8}$/.test(value) || // hex rgb, rgba, rrggbb, rrggbbaa
+    /^(?:url|var|rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color|color-mix)\(.*\)$/.test(value) || // <funciri>, CSS variable, color, etc.
+    namedColors.has(value) // currentColor, red, etc.
   );
 }
 

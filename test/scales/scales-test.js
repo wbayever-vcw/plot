@@ -37,6 +37,12 @@ it("Plot does not throw an error if a quantile scale has a non-monotonic domain"
   });
 });
 
+it("Scale types are lowercased", () => {
+  assert.strictEqual(Plot.scale({x: {type: "UTC"}}).type, "utc");
+  assert.strictEqual(Plot.scale({color: {type: "OrDiNaL"}}).type, "ordinal");
+  assert.strictEqual(Plot.scale({fx: {type: "BAND"}}).type, "band");
+});
+
 it("Plot.scale(description) returns a standalone scale", () => {
   const color = Plot.scale({color: {type: "linear"}});
   scaleEqual(color, {
@@ -2190,6 +2196,54 @@ it("plot(…).scale(name) returns a deduplicated ordinal/temporal domain", () =>
     step: 200,
     type: "point"
   });
+});
+
+it("mark(data, {channels}) respects a scale set to undefined", () => {
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["red"]}}}).initialize().channels.fill.scale,
+    undefined
+  );
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["foo"]}}}).initialize().channels.fill.scale,
+    undefined
+  );
+});
+
+it("mark(data, {channels}) respects a scale set to auto", () => {
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["red"], scale: "auto"}}}).initialize().channels.fill.scale,
+    null
+  );
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["foo"], scale: "auto"}}}).initialize().channels.fill.scale,
+    "color"
+  );
+});
+
+it("mark(data, {channels}) respects a scale set to true or false", () => {
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["red"], scale: true}}}).initialize().channels.fill.scale,
+    "color"
+  );
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["red"], scale: false}}}).initialize().channels.fill.scale,
+    null
+  );
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["foo"], scale: true}}}).initialize().channels.fill.scale,
+    "color"
+  );
+  assert.strictEqual(
+    Plot.dot({length: 1}, {channels: {fill: {value: ["foo"], scale: false}}}).initialize().channels.fill.scale,
+    null
+  );
+});
+
+it("mark(data, {channels}) rejects unknown scales", () => {
+  assert.throws(
+    () => Plot.dot([], {channels: {fill: {value: (d) => d, scale: "neo"}}}).initialize().channels.fill.scale,
+    /^Error: unknown scale: neo$/
+  );
 });
 
 // Given a plot specification (or, as shorthand, an array of marks or a single

@@ -13,8 +13,10 @@ import {
   coerceDate,
   coerceNumbers,
   identity,
+  isInterval,
   isIterable,
   isTemporal,
+  isTimeInterval,
   labelof,
   map,
   maybeApplyInterval,
@@ -65,9 +67,13 @@ export function bin(outputs = {fill: "count"}, options = {}) {
 }
 
 function maybeDenseInterval(bin, k, options = {}) {
-  return options?.interval == null
-    ? options
-    : bin({[k]: options?.reduce === undefined ? reduceFirst : options.reduce, filter: null}, options);
+  if (options?.interval == null) return options;
+  const {reduce = reduceFirst} = options;
+  const outputs = {filter: null};
+  if (options[k] != null) outputs[k] = reduce;
+  if (options[`${k}1`] != null) outputs[`${k}1`] = reduce;
+  if (options[`${k}2`] != null) outputs[`${k}2`] = reduce;
+  return bin(outputs, options);
 }
 
 export function maybeDenseIntervalX(options = {}) {
@@ -161,7 +167,7 @@ function binn(
       const BX2 = bx && setBX2([]);
       const BY1 = by && setBY1([]);
       const BY2 = by && setBY2([]);
-      const bin = bing(bx?.(data), by?.(data));
+      const bin = bing(bx, by, data);
       let i = 0;
       for (const o of outputs) o.initialize(data);
       if (sort) sort.initialize(data);
@@ -178,9 +184,9 @@ function binn(
               groupFacet.push(i++);
               groupData.push(reduceData.reduceIndex(b, data, extent));
               if (K) GK.push(k);
-              if (Z) GZ.push(G === Z ? f : Z[b[0]]);
-              if (F) GF.push(G === F ? f : F[b[0]]);
-              if (S) GS.push(G === S ? f : S[b[0]]);
+              if (Z) GZ.push(G === Z ? f : Z[(b.length > 0 ? b : g)[0]]);
+              if (F) GF.push(G === F ? f : F[(b.length > 0 ? b : g)[0]]);
+              if (S) GS.push(G === S ? f : S[(b.length > 0 ? b : g)[0]]);
               if (BX1) BX1.push(extent.x1), BX2.push(extent.x2);
               if (BY1) BY1.push(extent.y1), BY2.push(extent.y2);
               for (const o of outputs) o.reduce(b, extent);
@@ -361,22 +367,16 @@ function isTimeThresholds(t) {
   return isTimeInterval(t) || (isIterable(t) && isTemporal(t));
 }
 
-function isTimeInterval(t) {
-  return isInterval(t) && typeof t === "function" && t() instanceof Date;
-}
-
-function isInterval(t) {
-  return typeof t?.range === "function";
-}
-
-function bing(EX, EY) {
+function bing(bx, by, data) {
+  const EX = bx?.(data);
+  const EY = by?.(data);
   return EX && EY
     ? function* (I) {
         const X = EX.bin(I); // first bin on x
         for (const [ix, [x1, x2]] of EX.entries()) {
           const Y = EY.bin(X[ix]); // then bin on y
           for (const [iy, [y1, y2]] of EY.entries()) {
-            yield [Y[iy], {x1, y1, x2, y2}];
+            yield [Y[iy], {data, x1, y1, x2, y2}];
           }
         }
       }
@@ -384,13 +384,13 @@ function bing(EX, EY) {
     ? function* (I) {
         const X = EX.bin(I);
         for (const [i, [x1, x2]] of EX.entries()) {
-          yield [X[i], {x1, x2}];
+          yield [X[i], {data, x1, x2}];
         }
       }
     : function* (I) {
         const Y = EY.bin(I);
         for (const [i, [y1, y2]] of EY.entries()) {
-          yield [Y[i], {y1, y2}];
+          yield [Y[i], {data, y1, y2}];
         }
       };
 }
