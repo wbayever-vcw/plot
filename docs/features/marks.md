@@ -584,7 +584,7 @@ The render function is called with the following six arguments:
 * *context*: the context
 * *next*: the next render method in the chain
 
-The function is expected to return a single SVG node, or null or undefined if the facet should be skipped. Typically, it returns a [&lt;g>](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g) container, with a child node (say, a [&lt;circle>](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle)) for each valid data point.
+The function is expected to return a single SVG node, or null or undefined if no output is desired for the current facet. Typically, it returns a [G element](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g), with a child node (say, a [circle element](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle)) for each valid data point.
 
 The *index* is an array of indices in the channels, that represent the points to be drawn in the current facet. The *scales* object contains the scale functions, indexed by name, and an additional scales property with the scales descriptors, also indexed by name.
 
