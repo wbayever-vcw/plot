@@ -567,7 +567,7 @@ Plot.marks(
 
 A convenience method for composing a mark from a series of other marks. Returns an array of marks that implements the *mark*.plot function. See the [box mark](../marks/box.md) implementation for an example.
 
-## Custom marks
+## Rendering
 
 A mark’s render method is called once for each facet, unless its data for that facet is empty. The render method is responsible for drawing the mark by producing an SVG element. You can extend or replace this method by specifying the **render** mark option as a custom function.
 
