@@ -572,7 +572,7 @@ A convenience method for composing a mark from a series of other marks. Returns 
 A mark’s render method is called once for each facet, unless its data for that facet is empty. The render method is responsible for drawing the mark by producing an SVG element. You can extend or replace this method by specifying the **render** mark option as a custom function.
 
 :::warning
-Note that, in general, we do not recommend using this low-level interface when a more high-level option exists. It is meant for use by extension developers more than by users.
+Note that, in general, we do not recommend using this low-level interface when a more high-level option exists such as a [data transform](https://observablehq.com/plot/features/transforms). It is meant for use by extension developers more than by users.
 :::
 
 The render function is called with the following six arguments:
