@@ -553,7 +553,7 @@ All marks support the following [transform](./transforms.md) options:
 
 The **sort** option, when not specified as a channel value (such as a field name or an accessor function), can also be used to [impute ordinal scale domains](./scales.md#sort-mark-option).
 
-The **render** option allows to override or extend the default mark’s rendering method and create [custom marks](#custom-marks).
+The **render** option allows to override or extend the default mark’s [rendering](#rendering) method.
 
 ## marks(...*marks*) <VersionBadge version="0.2.0" /> {#marks}
 
@@ -569,13 +569,13 @@ A convenience method for composing a mark from a series of other marks. Returns 
 
 ## Rendering
 
-A mark’s render method is called once for each facet, unless its data for that facet is empty. The render method is responsible for drawing the mark by producing an SVG element. You can extend or replace this method by specifying the **render** mark option as a custom function.
+A mark’s render method is called once for each facet, unless its data for that facet is empty. The render method is responsible for drawing the mark by producing an SVG element.
 
 :::warning
-Note that, in general, we do not recommend using this low-level interface when a more high-level option exists such as a [data transform](https://observablehq.com/plot/features/transforms). It is meant for use by extension developers more than by users.
+We do not recommend using this low-level interface when a more high-level option exists such as a [data transform](https://observablehq.com/plot/features/transforms). It is meant for use by extension developers more than by users.
 :::
 
-The render function is called with the following six arguments:
+The mark’s render function is called with the following five arguments:
 
 * *index*: the index of the facet
 * *scales*: the scale functions and descriptors
@@ -584,6 +584,10 @@ The render function is called with the following six arguments:
 * *context*: the context
 
 The function is expected to return a single SVG node, or null or undefined if no output is desired for the current facet. Typically, it returns a [G element](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/g), with a child node (say, a [circle element](https://developer.mozilla.org/en-US/docs/Web/SVG/Element/circle)) for each valid data point.
+
+You can extend or replace this method by specifying a render transform with the mark’s **render** option. The render transform will be called with the five arguments described above and a sixth argument:
+
+* *next*: the next render method in the chain
 
 The *index* is an array of indices in the channels, that represent the points to be drawn in the current facet. The *scales* object contains the scale functions, indexed by name, and an additional scales property with the scales descriptors, also indexed by name.
 
@@ -594,9 +598,9 @@ Plot.dot(penguins, {
   x: "culmen_length_mm",
   y: "culmen_depth_mm",
   fill: "island",
-  render(index, scales, values, dimensions, context, next) {
+  render(index, scales) {
     console.log(scales.color("Torgersen")); // "#e15759"
-    console.log(scales.scales.color);
+    console.log(scales.scales.color); // {type: "ordinal", …}
   }
 }).plot()
 ```
@@ -609,7 +613,7 @@ Plot.dot(penguins, {
   y: "culmen_depth_mm",
   fx: "species",
   fill: "island",
-  render(index, scales, values, dimensions, context, next) {
+  render(index, scales, values) {
     const i = index[0];
     console.log(i, values.fill[i], values.channels.fill.value[i]);
   }
@@ -652,7 +656,7 @@ The *context* contains several useful globals:
 When you write a plugin, using *context*.document allows your code to run in different contexts such as a server-side rendering environment.
 :::
 
-The last argument, *next*, is a function that can be called to continue the render chain. For example, if you wish to animate a mark to fade in, you can render it as usual, immediately set its opacity to 0, then bring it to life with D3:
+Render transforms are called with a sixth argument, *next*, a function that can be called to continue the render chain. For example, if you wish to animate a mark to fade in, you can render it as usual, immediately set its opacity to 0, then bring it to life with D3:
 
 ```js
 Plot.dot(penguins, {
