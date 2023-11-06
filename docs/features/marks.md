@@ -630,7 +630,7 @@ The *dimensions* object contains the marginTop, marginRight, marginLeft,marginBo
 ```js
 Plot.plot({
   marks: [
-    function (index, scales, values, dimensions, context, next) {
+    function (index, scales, values, dimensions, context) {
       const e = context.document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
       e.setAttribute("rx", (dimensions.width - dimensions.marginLeft - dimensions.marginRight) / 2);
       e.setAttribute("ry", (dimensions.height - dimensions.marginTop - dimensions.marginBottom) / 2);
