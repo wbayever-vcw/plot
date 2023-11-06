@@ -596,7 +596,7 @@ Plot.dot(penguins, {
   y: "culmen_depth_mm",
   fill: "island",
   render(index, scales, values, dimensions, context, next) {
-    console.log(scales.color("Torgersen"));
+    console.log(scales.color("Torgersen")); // "#e15759"
     console.log(scales.scales.color);
   }
 }).plot()
